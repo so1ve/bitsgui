@@ -10,6 +10,7 @@
 		"lint": "eslint . || prettier --check .",
 		"lint:fix": "eslint . --fix || prettier --write .",
 		"preview": "vite preview",
+		"release": "bumpp",
 		"tauri": "tauri",
 		"typecheck": "vue-tsc --noEmit"
 	},
