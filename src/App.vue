@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { Toaster } from "vue-sonner";
 
+import { state } from "./state";
+
 import "vue-sonner/style.css";
 </script>
 
 <template>
 	<Toaster position="top-center" rich-colors />
 	<div class="min-h-dvh min-w-dvw p-3">
-		<RouterView v-slot="{ Component }">
+		<RouterView v-if="state.initialized" v-slot="{ Component }">
 			<template v-if="Component">
 				<Transition mode="out-in">
 					<Suspense>
@@ -18,5 +20,13 @@ import "vue-sonner/style.css";
 				</Transition>
 			</template>
 		</RouterView>
+		<div v-else class="flex h-full w-full items-center justify-center">
+			<div v-if="!state.initializeMessage" class="animate-pulse text-gray-500">
+				正在初始化...
+			</div>
+			<div v-else class="text-red-500">
+				初始化失败：{{ state.initializeMessage }}
+			</div>
+		</div>
 	</div>
 </template>

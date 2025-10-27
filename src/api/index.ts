@@ -1,10 +1,16 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useThrottleFn } from "@vueuse/core";
 
+import { state } from "../state";
 import type { ApiResponse, Credentials, SrunLoginState } from "../types";
 
 export async function initBitsrun() {
-	await invoke("init");
+	const response = await invoke<ApiResponse<string, string>>("init");
+	if (response.success) {
+		state.initialized = true;
+	} else {
+		state.initializeMessage = response.error;
+	}
 }
 
 export const checkStatus = useThrottleFn(

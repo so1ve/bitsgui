@@ -7,5 +7,7 @@ const credentials = await getCredentials();
 export const state = reactive({
 	firstOpen: true,
 	manualLogout: false,
+	initialized: false,
+	initializeMessage: "",
 	credentials,
 });
