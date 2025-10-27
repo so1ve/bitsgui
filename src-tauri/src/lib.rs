@@ -1,4 +1,4 @@
-use bitsrun_lib::{get_login_state, SrunClient, SrunLoginState};
+use bitsrun_lib::{SrunClient, SrunLoginState, get_login_state};
 use log::debug;
 use reqwest::Client;
 use tauri::async_runtime::Mutex;
@@ -111,7 +111,10 @@ pub fn run() {
     #[cfg(not(dev))]
     let builder = {
         let prevent = tauri_plugin_prevent_default::Builder::new()
-            .with_flags(Flags::CONTEXT_MENU | Flags::PRINT | Flags::DOWNLOADS | Flags::RELOAD)
+            .with_flags(
+                Flags::CONTEXT_MENU | Flags::PRINT | Flags::DOWNLOADS | Flags::RELOAD | Flags::FIND,
+            )
+            .shortcut(KeyboardShortcut::new("F12"))
             .build();
         builder.plugin(prevent)
     };
