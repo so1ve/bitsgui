@@ -75,7 +75,7 @@ async function handleLogin() {
 		<form class="flex flex-col gap-4" @submit.prevent="handleLogin">
 			<div class="form-control w-full">
 				<label class="label">
-					<span class="label-text text-base-content">学号/用户名</span>
+					<span class="label-text text-base-content">用户名/学号</span>
 				</label>
 				<input
 					v-model="state.credentials.username"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Toaster } from "vue-sonner";
 
+import OverlayScrollbars from "./components/OverlayScrollbars.vue";
 import { state } from "./state";
 
 import "vue-sonner/style.css";
@@ -29,4 +30,5 @@ import "vue-sonner/style.css";
 			</div>
 		</div>
 	</div>
+	<OverlayScrollbars />
 </template>

@@ -52,7 +52,7 @@ async function handleLogout() {
 			<table class="table table-sm">
 				<tbody>
 					<tr>
-						<td>用户名/学号</td>
+						<td>用户名</td>
 						<td>{{ data.user_name }}</td>
 					</tr>
 					<tr>
