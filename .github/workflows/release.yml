@@ -68,7 +68,7 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
 
-  release:
+  changelog:
     runs-on: ubuntu-latest
     needs: publish-tauri
     steps:
