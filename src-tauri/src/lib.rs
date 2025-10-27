@@ -3,7 +3,8 @@ use log::debug;
 use reqwest::Client;
 use tauri::async_runtime::Mutex;
 use tauri::menu::{CheckMenuItemBuilder, MenuBuilder, SubmenuBuilder};
-use tauri::{Manager, State};
+// use tauri::tray::TrayIconBuilder;
+use tauri::{App, Manager, State};
 use tauri_plugin_autostart::ManagerExt;
 #[cfg(not(dev))]
 use tauri_plugin_prevent_default::Flags;
@@ -86,8 +87,58 @@ async fn check_status() -> Result<ApiResponse<SrunLoginState, String>, ()> {
     }
 }
 
+fn setup_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
+    let autostart_manager = app.autolaunch();
+
+    let item_auto_start = CheckMenuItemBuilder::new("自动启动")
+        .id("auto_start")
+        .checked(autostart_manager.is_enabled().unwrap_or(false))
+        .build(app)?;
+
+    let menu_settings = SubmenuBuilder::new(app, "设置")
+        .item(&item_auto_start)
+        .build()?;
+
+    // let menu_dev =MenuItem::new(app, "设置")
+    //     .item(&item_auto_start)
+    //     .build()?;
+
+    let menu = MenuBuilder::new(app)
+        .items(&[&menu_settings])
+        .text("devtools", "Devtools")
+        .build()?;
+
+    app.set_menu(menu)?;
+
+    app.on_menu_event(
+        move |app: &tauri::AppHandle, event| match event.id().0.as_str() {
+            "auto_start" => {
+                let autostart_manager = app.autolaunch();
+
+                if item_auto_start.is_checked().unwrap() {
+                    autostart_manager.enable().unwrap()
+                } else {
+                    autostart_manager.disable().unwrap()
+                }
+            }
+
+            "devtools" => {
+                let window = app.get_webview_window("main").unwrap();
+                window.open_devtools();
+            }
+
+            _ => {
+                println!("unexpected menu event");
+            }
+        },
+    );
+
+    Ok(())
+}
+
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(tauri_plugin_log::log::LevelFilter::Info)
@@ -122,50 +173,11 @@ pub fn run() {
     builder
         .invoke_handler(tauri::generate_handler![init, login, logout, check_status,])
         .setup(|app| {
-            let autostart_manager = app.autolaunch();
+            // let tray = TrayIconBuilder::new()
+            //     .icon(app.default_window_icon().unwrap().clone())
+            //     .build(app)?;
 
-            let item_auto_start = CheckMenuItemBuilder::new("自动启动")
-                .id("auto_start")
-                .checked(autostart_manager.is_enabled().unwrap_or(false))
-                .build(app)?;
-
-            let menu_settings = SubmenuBuilder::new(app, "设置")
-                .item(&item_auto_start)
-                .build()?;
-
-            // let menu_dev =MenuItem::new(app, "设置")
-            //     .item(&item_auto_start)
-            //     .build()?;
-
-            let menu = MenuBuilder::new(app)
-                .items(&[&menu_settings])
-                .text("devtools", "Devtools")
-                .build()?;
-
-            app.set_menu(menu)?;
-
-            app.on_menu_event(
-                move |app: &tauri::AppHandle, event| match event.id().0.as_str() {
-                    "auto_start" => {
-                        let autostart_manager = app.autolaunch();
-
-                        if item_auto_start.is_checked().unwrap() {
-                            autostart_manager.enable().unwrap()
-                        } else {
-                            autostart_manager.disable().unwrap()
-                        }
-                    }
-
-                    "devtools" => {
-                        let window = app.get_webview_window("main").unwrap();
-                        window.open_devtools();
-                    }
-
-                    _ => {
-                        println!("unexpected menu event");
-                    }
-                },
-            );
+            setup_menu(app)?;
 
             Ok(())
         })
