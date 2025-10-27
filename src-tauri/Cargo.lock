@@ -156,7 +156,7 @@ dependencies = [
 
 [[package]]
 name = "bitsgui"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "bitsrun-lib",
  "log",
