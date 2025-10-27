@@ -15,7 +15,7 @@
 				"title": "BITSGUI",
 				"center": true,
 				"width": 280,
-				"height": 370,
+				"height": 340,
 				"resizable": false,
 				"maximizable": false
 			}

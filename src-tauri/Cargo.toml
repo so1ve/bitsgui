@@ -23,14 +23,16 @@ tauri = { version = "2", default-features = true, features = [
 ] }
 tauri-plugin-store = "2"
 tauri-plugin-prevent-default = "3"
+tauri-plugin-log = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 bitsrun-lib = "0.3.0"
 reqwest = { version = "0.12.24", features = [
 	"json",
 	"rustls-tls",
+	"socks",
+	"system-proxy",
 ], default-features = false }
-tauri-plugin-log = "2"
 log = "0.4.28"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
