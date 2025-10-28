@@ -26,7 +26,7 @@
 	},
 	"bundle": {
 		"active": true,
-		"targets": "all",
+		"targets": ["app", "appimage", "deb", "dmg", "nsis", "rpm"],
 		"icon": [
 			"icons/32x32.png",
 			"icons/128x128.png",
@@ -40,9 +40,7 @@
 				"silent": true
 			},
 			"nsis": {
-				"displayLanguageSelector": true,
-				"installerIcon": "icons/icon.ico",
-				"languages": ["SimpChinese", "English"]
+				"displayLanguageSelector": true
 			}
 		}
 	}
