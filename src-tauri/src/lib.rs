@@ -7,7 +7,7 @@ use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri::{App, Manager, State, WindowEvent};
 use tauri_plugin_autostart::ManagerExt;
 #[cfg(not(dev))]
-use tauri_plugin_prevent_default::Flags;
+use tauri_plugin_prevent_default::{Flags, KeyboardShortcut};
 
 use crate::api::ApiResponse;
 
