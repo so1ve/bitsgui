@@ -2,7 +2,7 @@ use bitsrun_lib::{SrunClient, SrunLoginState, get_login_state};
 use log::{debug, warn};
 use reqwest::Client;
 use tauri::async_runtime::Mutex;
-use tauri::menu::{CheckMenuItemBuilder, Menu, MenuItem};
+use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
 use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri::{App, Manager, State, WindowEvent};
 use tauri_plugin_autostart::ManagerExt;
@@ -87,16 +87,59 @@ async fn check_status() -> Result<ApiResponse<SrunLoginState, String>, ()> {
     }
 }
 
-fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
+fn setup_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let autostart_manager = app.autolaunch();
 
-    let item_show_window = MenuItem::with_id(app, "show_window", "显示窗口", true, None::<&str>)?;
     let item_auto_start = CheckMenuItemBuilder::new("自动启动")
         .id("auto_start")
         .checked(autostart_manager.is_enabled().unwrap_or(false))
         .build(app)?;
+
+    let menu_settings = SubmenuBuilder::new(app, "设置")
+        .item(&item_auto_start)
+        .build()?;
+
+    // let menu_dev =MenuItem::new(app, "设置")
+    //     .item(&item_auto_start)
+    //     .build()?;
+
+    let menu = MenuBuilder::new(app)
+        .items(&[&menu_settings])
+        .text("devtools", "Devtools")
+        .build()?;
+
+    app.set_menu(menu)?;
+
+    app.on_menu_event(
+        move |app: &tauri::AppHandle, event| match event.id().0.as_str() {
+            "auto_start" => {
+                let autostart_manager = app.autolaunch();
+
+                if item_auto_start.is_checked().unwrap() {
+                    autostart_manager.enable().unwrap()
+                } else {
+                    autostart_manager.disable().unwrap()
+                }
+            }
+
+            "devtools" => {
+                let window = app.get_webview_window("main").unwrap();
+                window.open_devtools();
+            }
+
+            _ => {
+                println!("unexpected menu event");
+            }
+        },
+    );
+
+    Ok(())
+}
+
+fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
+    let item_show_window = MenuItem::with_id(app, "show_window", "显示窗口", true, None::<&str>)?;
     let item_quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&item_show_window, &item_auto_start, &item_quit])?;
+    let menu = Menu::with_items(app, &[&item_show_window, &item_quit])?;
 
     let _tray = TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
@@ -109,15 +152,6 @@ fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                     let _ = window.unminimize();
                     let _ = window.show();
                     let _ = window.set_focus();
-                }
-            }
-            "auto_start" => {
-                let autostart_manager = app.autolaunch();
-
-                if item_auto_start.is_checked().unwrap() {
-                    autostart_manager.enable().unwrap()
-                } else {
-                    autostart_manager.disable().unwrap()
                 }
             }
             "quit" => {
@@ -179,6 +213,7 @@ pub fn run() {
             .with_flags(
                 Flags::CONTEXT_MENU | Flags::PRINT | Flags::DOWNLOADS | Flags::RELOAD | Flags::FIND,
             )
+            .shortcut(KeyboardShortcut::new("F12"))
             .build();
         builder.plugin(prevent)
     };
@@ -186,7 +221,9 @@ pub fn run() {
     builder
         .invoke_handler(tauri::generate_handler![init, login, logout, check_status,])
         .setup(|app| {
+            setup_menu(app)?;
             setup_tray(app)?;
+
             Ok(())
         })
         .on_window_event(|window, event| {
