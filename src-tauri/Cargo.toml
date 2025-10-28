@@ -1,6 +1,6 @@
 [package]
 name = "bitsgui"
-description = "Simple login and logout app for 10.0.0.55 at BIT"
+description = "A simple login / logout desktop app for gateway (10.0.0.55) at BIT"
 authors = ["Ray <i@mk1.io>"]
 edition = "2024"
 
