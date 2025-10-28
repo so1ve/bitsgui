@@ -21,6 +21,7 @@ tauri = { version = "2", default-features = true, features = [
 	"devtools",
 	"tray-icon",
 ] }
+tauri-plugin-opener = "2"
 tauri-plugin-store = "2"
 tauri-plugin-prevent-default = "3"
 tauri-plugin-log = "2"

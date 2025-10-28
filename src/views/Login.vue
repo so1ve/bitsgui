@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
 import { isLoggedIn, login, setCredentials } from "../api";
+import AppFooter from "../components/AppFooter.vue";
 import { state } from "../state";
 
 const router = useRouter();
@@ -71,61 +72,64 @@ async function handleLogin() {
 
 <template>
 	<div>
-		<h2 class="text-2xl font-semibold mb-2 text-center">登录</h2>
-		<form class="flex flex-col gap-4" @submit.prevent="handleLogin">
-			<div class="form-control w-full">
-				<label class="label">
-					<span class="label-text text-base-content">用户名/学号</span>
-				</label>
-				<input
-					v-model="state.credentials.username"
-					class="input input-bordered w-full"
-					type="text"
-				/>
-			</div>
-
-			<div class="form-control w-full">
-				<label class="label">
-					<span class="label-text text-base-content">密码</span>
-				</label>
-				<input
-					v-model="state.credentials.password"
-					class="input input-bordered w-full"
-					type="password"
-				/>
-			</div>
-
-			<fieldset class="grid grid-cols-2">
-				<label class="label">
+		<div>
+			<h2 class="text-2xl font-semibold mb-2 text-center">登录</h2>
+			<form class="flex flex-col gap-4" @submit.prevent="handleLogin">
+				<div class="form-control w-full">
+					<label class="label">
+						<span class="label-text text-base-content">用户名/学号</span>
+					</label>
 					<input
-						v-model="state.credentials.rememberMe"
-						class="checkbox"
-						type="checkbox"
+						v-model="state.credentials.username"
+						class="input input-bordered w-full"
+						type="text"
 					/>
-					记住我
-				</label>
-				<label class="label">
-					<input
-						v-model="state.credentials.autoLogin"
-						class="checkbox"
-						type="checkbox"
-					/>
-					自动登录
-				</label>
-			</fieldset>
+				</div>
 
-			<button
-				class="btn w-full"
-				:class="{
-					'btn-accent': !loading,
-					'btn-disabled': loading,
-				}"
-				:disabled="loading"
-				type="submit"
-			>
-				<span v-if="loading" class="loading loading-spinner" />
-				登录
-			</button>
-		</form>
+				<div class="form-control w-full">
+					<label class="label">
+						<span class="label-text text-base-content">密码</span>
+					</label>
+					<input
+						v-model="state.credentials.password"
+						class="input input-bordered w-full"
+						type="password"
+					/>
+				</div>
+
+				<fieldset class="grid grid-cols-2">
+					<label class="label">
+						<input
+							v-model="state.credentials.rememberMe"
+							class="checkbox"
+							type="checkbox"
+						/>
+						记住我
+					</label>
+					<label class="label">
+						<input
+							v-model="state.credentials.autoLogin"
+							class="checkbox"
+							type="checkbox"
+						/>
+						自动登录
+					</label>
+				</fieldset>
+
+				<button
+					class="btn w-full"
+					:class="{
+						'btn-accent': !loading,
+						'btn-disabled': loading,
+					}"
+					:disabled="loading"
+					type="submit"
+				>
+					<span v-if="loading" class="loading loading-spinner" />
+					登录
+				</button>
+			</form>
+		</div>
+		<AppFooter />
 	</div>
 </template>
