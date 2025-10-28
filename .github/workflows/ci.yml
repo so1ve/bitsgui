@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src-tauri/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "src-tauri/**"
+      - ".github/workflows/ci.yml"
+
+jobs:
+  rust:
+    name: Rust Check (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy, rustfmt
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Run cargo check
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Run cargo clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+
+      - name: Run cargo fmt
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
