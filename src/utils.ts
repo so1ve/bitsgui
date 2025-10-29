@@ -1,4 +1,8 @@
+import { useIntervalFn } from "@vueuse/core";
 import humanize from "humanize-duration";
+
+import { checkStatus, isLoggedIn, setLoggedIn } from "./api";
+import type { ApiResponse, SrunLoginState } from "./types";
 
 export const humanizeDuration = (ms: number) =>
 	humanize(ms, {
@@ -30,4 +34,31 @@ export function formatFlux(byte: number) {
 	}
 
 	return `${byte}B`;
+}
+
+export async function useCheckStatus(
+	cb: (
+		loggedIn: boolean,
+		status: ApiResponse<SrunLoginState, string>,
+	) => Promise<void>,
+) {
+	const firstCall = true;
+	const prev = await isLoggedIn();
+
+	async function trigger() {
+		const response = await checkStatus();
+		const loggedIn = await isLoggedIn();
+
+		if (prev !== loggedIn || firstCall) {
+			await setLoggedIn(loggedIn);
+			await cb(loggedIn, response);
+		}
+	}
+
+	useIntervalFn(trigger, 3000, {
+		immediate: true,
+		immediateCallback: true,
+	});
+
+	return trigger;
 }

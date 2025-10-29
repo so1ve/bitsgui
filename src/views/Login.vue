@@ -1,29 +1,21 @@
 <script setup lang="ts">
-import { useIntervalFn } from "@vueuse/core";
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
-import { isLoggedIn, login, setCredentials, setLoggedIn } from "../api";
+import { login, setCredentials } from "../api";
 import AppFooter from "../components/AppFooter.vue";
 import { state } from "../state";
+import { useCheckStatus } from "../utils";
 
 const router = useRouter();
 const loading = ref(true);
 
-useIntervalFn(checkStatusAndRedirect, 2000, {
-	immediate: true,
-	immediateCallback: true,
-});
-
-async function checkStatusAndRedirect() {
-	const loggedIn = await isLoggedIn();
-	await setLoggedIn(loggedIn);
-
+const triggerCheckStatus = await useCheckStatus(async (loggedIn) => {
 	if (loggedIn) {
 		router.push("/status");
 	}
-}
+});
 
 watch(
 	() => state.credentials.rememberMe,
@@ -48,7 +40,7 @@ if (state.firstOpen) {
 
 	if (state.credentials.autoLogin && !state.manualLogout) {
 		await login(state.credentials);
-		await checkStatusAndRedirect();
+		await triggerCheckStatus();
 	} else {
 		loading.value = false;
 	}
@@ -63,7 +55,7 @@ async function handleLogin() {
 	}
 	const response = await login(state.credentials);
 	if (response.success) {
-		await checkStatusAndRedirect();
+		await triggerCheckStatus();
 		toast.success("登录成功！");
 	} else {
 		loading.value = false;

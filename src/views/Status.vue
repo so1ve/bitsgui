@@ -1,34 +1,24 @@
 <script setup lang="ts">
-import { useIntervalFn } from "@vueuse/core";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
-import { checkStatus, isLoggedIn, logout, setLoggedIn } from "../api";
+import { logout } from "../api";
 import AppFooter from "../components/AppFooter.vue";
 import { state } from "../state";
 import type { SrunLoginState, SrunLoginStateLoggedIn } from "../types";
-import { formatFlux, humanizeDuration } from "../utils";
+import { formatFlux, humanizeDuration, useCheckStatus } from "../utils";
 
 const router = useRouter();
 const data = ref(null as null | SrunLoginState<SrunLoginStateLoggedIn>);
 const loading = ref(false);
 
-async function updateStatusOrRedirect() {
-	const response = await checkStatus();
-	const loggedIn = await isLoggedIn();
-	await setLoggedIn(loggedIn);
-
+const triggerCheckStatus = await useCheckStatus(async (loggedIn, status) => {
 	if (!loggedIn) {
 		router.push("/");
-	} else if (response.success) {
-		data.value = response.data as any;
+	} else if (status.success) {
+		data.value = status.data as any;
 	}
-}
-
-useIntervalFn(updateStatusOrRedirect, 3000, {
-	immediate: true,
-	immediateCallback: true,
 });
 
 async function handleLogout() {
@@ -43,7 +33,7 @@ async function handleLogout() {
 		toast.error(`注销失败：${response.error}`);
 	}
 
-	updateStatusOrRedirect();
+	triggerCheckStatus();
 }
 </script>
 
