@@ -4,7 +4,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
-import { checkStatus, isLoggedIn, logout } from "../api";
+import { checkStatus, isLoggedIn, logout, setLoggedIn } from "../api";
 import AppFooter from "../components/AppFooter.vue";
 import { state } from "../state";
 import type { SrunLoginState, SrunLoginStateLoggedIn } from "../types";
@@ -17,6 +17,7 @@ const loading = ref(false);
 async function updateStatusOrRedirect() {
 	const response = await checkStatus();
 	const loggedIn = await isLoggedIn();
+	await setLoggedIn(loggedIn);
 
 	if (!loggedIn) {
 		router.push("/");

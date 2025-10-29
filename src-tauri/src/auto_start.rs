@@ -28,8 +28,8 @@ impl<'r> AutoStartManager<'r> {
         if enable {
             self.manager.enable()
         } else {
-            // 系统找不到指定的文件。 (os error 2) Bug workaround: create registry entry
-            // before disabling
+            // 系统找不到指定的文件。 (os error 2)
+            // Bug workaround: create registry entry before disabling
             self.manager.enable()?;
             self.manager.disable()
         }

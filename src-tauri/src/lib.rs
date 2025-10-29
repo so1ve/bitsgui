@@ -4,7 +4,7 @@ use reqwest::Client;
 use tauri::async_runtime::Mutex;
 use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
 use tauri::tray::{TrayIconBuilder, TrayIconEvent};
-use tauri::{App, Manager, State, WindowEvent};
+use tauri::{App, AppHandle, Manager, State, WindowEvent};
 
 use crate::api::ApiResponse;
 use crate::auto_start::AutoStartManager;
@@ -86,6 +86,25 @@ async fn check_status() -> Result<ApiResponse<SrunLoginState, String>, ()> {
     }
 }
 
+#[tauri::command]
+async fn set_logged_in(logged_in: bool, app_handle: AppHandle) -> Result<(), ()> {
+    update_tooltip(&app_handle, logged_in);
+
+    Ok(())
+}
+
+fn update_tooltip(app_handle: &AppHandle, logged_in: bool) {
+    if let Some(tray) = app_handle.tray_by_id("main") {
+        if logged_in {
+            tray.set_tooltip(Some("BITSGUI - 已登录")).unwrap();
+        } else {
+            tray.set_tooltip(Some("BITSGUI - 未登录")).unwrap();
+        }
+    } else {
+        warn!("Tray not found when updating tooltip");
+    }
+}
+
 fn setup_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let autostart_manager = AutoStartManager::new(app);
 
@@ -110,16 +129,16 @@ fn setup_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     app.set_menu(menu)?;
 
     app.on_menu_event(
-        move |app: &tauri::AppHandle, event| match event.id().0.as_str() {
+        move |app_handle: &AppHandle, event| match event.id().0.as_str() {
             "auto_start" => {
-                let autostart_manager = AutoStartManager::new(app);
+                let autostart_manager = AutoStartManager::new(app_handle);
                 autostart_manager
                     .set_enabled(item_auto_start.is_checked().unwrap())
                     .unwrap();
             }
 
             "devtools" => {
-                let window = app.get_webview_window("main").unwrap();
+                let window = app_handle.get_webview_window("main").unwrap();
                 window.open_devtools();
             }
 
@@ -137,7 +156,7 @@ fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let item_quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&item_show_window, &item_quit])?;
 
-    let _tray = TrayIconBuilder::new()
+    let _tray = TrayIconBuilder::with_id("main")
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
         .show_menu_on_left_click(false)
@@ -175,7 +194,8 @@ fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 println!("unhandled event {event:?}");
             }
         })
-        .build(app)?;
+        .build(app)?
+        .set_tooltip(Some("BITSGUI - 初始化"));
 
     Ok(())
 }
@@ -218,7 +238,13 @@ pub fn run() {
     };
 
     builder
-        .invoke_handler(tauri::generate_handler![init, login, logout, check_status,])
+        .invoke_handler(tauri::generate_handler![
+            init,
+            login,
+            logout,
+            check_status,
+            set_logged_in
+        ])
         .setup(|app| {
             setup_menu(app)?;
             setup_tray(app)?;

@@ -24,6 +24,9 @@ export async function isLoggedIn() {
 	return response.success && response.data.error === "ok";
 }
 
+export const setLoggedIn = async (loggedIn: boolean) =>
+	await invoke("set_logged_in", { loggedIn });
+
 export const login = async (credentials: Credentials) =>
 	await invoke<ApiResponse<SrunLoginState, string>>(
 		"login",

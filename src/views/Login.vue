@@ -4,7 +4,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
-import { isLoggedIn, login, setCredentials } from "../api";
+import { isLoggedIn, login, setCredentials, setLoggedIn } from "../api";
 import AppFooter from "../components/AppFooter.vue";
 import { state } from "../state";
 
@@ -18,6 +18,8 @@ useIntervalFn(checkStatusAndRedirect, 2000, {
 
 async function checkStatusAndRedirect() {
 	const loggedIn = await isLoggedIn();
+	await setLoggedIn(loggedIn);
+
 	if (loggedIn) {
 		router.push("/status");
 	}
