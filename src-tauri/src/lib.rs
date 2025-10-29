@@ -6,13 +6,12 @@ use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuil
 use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri::{App, Manager, State, WindowEvent};
 use tauri_plugin_autostart::ManagerExt;
-#[cfg(not(dev))]
-use tauri_plugin_prevent_default::{Flags, KeyboardShortcut};
-use tauri_plugin_store::StoreExt;
 
 use crate::api::ApiResponse;
+use crate::auto_start::AutoStartManager;
 
 mod api;
+mod auto_start;
 
 struct BitsguiState {
     client: Mutex<Option<SrunClient>>,
@@ -114,13 +113,10 @@ fn setup_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     app.on_menu_event(
         move |app: &tauri::AppHandle, event| match event.id().0.as_str() {
             "auto_start" => {
-                let autostart_manager = app.autolaunch();
-
-                if item_auto_start.is_checked().unwrap() {
-                    autostart_manager.enable().unwrap()
-                } else {
-                    autostart_manager.disable().unwrap()
-                }
+                let autostart_manager = AutoStartManager::new(app);
+                autostart_manager
+                    .set_enabled(item_auto_start.is_checked().unwrap())
+                    .unwrap();
             }
 
             "devtools" => {
@@ -211,6 +207,8 @@ pub fn run() {
 
     #[cfg(not(dev))]
     let builder = {
+        use tauri_plugin_prevent_default::{Flags, KeyboardShortcut};
+
         let prevent = tauri_plugin_prevent_default::Builder::new()
             .with_flags(
                 Flags::CONTEXT_MENU | Flags::PRINT | Flags::DOWNLOADS | Flags::RELOAD | Flags::FIND,
@@ -237,24 +235,8 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, event| {
-            let autostart_manager = app.autolaunch();
-            let settings = app.store("settings").unwrap();
-            if settings
-                .get("auto_start")
-                .unwrap_or_else(|| {
-                    settings.set("auto_start", false);
-                    settings.save().expect("failed to save settings");
-                    settings.get("auto_start").unwrap()
-                })
-                .as_bool()
-                .unwrap()
-            {
-                if !autostart_manager.is_enabled().unwrap_or(false) {
-                    autostart_manager.enable().unwrap();
-                }
-            } else if autostart_manager.is_enabled().unwrap_or(false) {
-                autostart_manager.disable().unwrap();
-            }
+            let autostart_manager = AutoStartManager::new(app);
+            autostart_manager.inherit_settings().unwrap();
 
             if let tauri::RunEvent::ExitRequested { api, code, .. } = event
                 && code.is_none()
