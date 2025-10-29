@@ -14,6 +14,10 @@
 
 请参考 [Tauri 官方文档](https://tauri.app/)。
 
+## TODOs
+
+- [ ] MacOS 图标 (`.icns`)
+
 ## 开发
 
 ### 推荐的 IDE 设置
