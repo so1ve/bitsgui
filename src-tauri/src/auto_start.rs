@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use tauri::{AppHandle, State, Wry};
+use tauri::{State, Wry};
 use tauri_plugin_autostart::{AutoLaunchManager, Error, ManagerExt};
 use tauri_plugin_store::{Store, StoreExt};
 
@@ -10,7 +10,10 @@ pub struct AutoStartManager<'r> {
 }
 
 impl<'r> AutoStartManager<'r> {
-    pub fn new(app: &'r AppHandle) -> Self {
+    pub fn new<A>(app: &'r A) -> Self
+    where
+        A: ManagerExt<Wry> + StoreExt<Wry>,
+    {
         let manager = app.autolaunch();
         let settings = app.store("settings").unwrap();
 
@@ -18,17 +21,7 @@ impl<'r> AutoStartManager<'r> {
     }
 
     pub fn inherit_settings(&self) -> Result<(), Error> {
-        let enabled = self
-            .settings
-            .get("auto_start")
-            .unwrap_or_else(|| {
-                self.settings.set("auto_start", false);
-                self.settings.save().expect("failed to save settings");
-                self.settings.get("auto_start").unwrap()
-            })
-            .as_bool()
-            .unwrap();
-        self.set_enabled(enabled)
+        self.set_enabled(self.is_enabled_in_config())
     }
 
     pub fn set_enabled(&self, enable: bool) -> Result<(), Error> {
@@ -44,5 +37,17 @@ impl<'r> AutoStartManager<'r> {
             self.settings.set("auto_start", enable);
             self.settings.save().expect("failed to save settings");
         })
+    }
+
+    pub fn is_enabled_in_config(&self) -> bool {
+        self.settings
+            .get("auto_start")
+            .unwrap_or_else(|| {
+                self.settings.set("auto_start", false);
+                self.settings.save().expect("failed to save settings");
+                self.settings.get("auto_start").unwrap()
+            })
+            .as_bool()
+            .unwrap()
     }
 }

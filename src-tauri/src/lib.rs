@@ -5,7 +5,6 @@ use tauri::async_runtime::Mutex;
 use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
 use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri::{App, Manager, State, WindowEvent};
-use tauri_plugin_autostart::ManagerExt;
 
 use crate::api::ApiResponse;
 use crate::auto_start::AutoStartManager;
@@ -88,11 +87,11 @@ async fn check_status() -> Result<ApiResponse<SrunLoginState, String>, ()> {
 }
 
 fn setup_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let autostart_manager = app.autolaunch();
+    let autostart_manager = AutoStartManager::new(app);
 
     let item_auto_start = CheckMenuItemBuilder::new("自动启动")
         .id("auto_start")
-        .checked(autostart_manager.is_enabled().unwrap_or(false))
+        .checked(autostart_manager.is_enabled_in_config())
         .build(app)?;
 
     let menu_settings = SubmenuBuilder::new(app, "设置")
