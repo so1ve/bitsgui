@@ -5,7 +5,6 @@ use tauri_plugin_autostart::{AutoLaunchManager, Error, ManagerExt};
 use tauri_plugin_store::{Store, StoreExt};
 
 pub struct AutoStartManager<'r> {
-    app: &'r AppHandle,
     manager: State<'r, AutoLaunchManager>,
     settings: Arc<Store<Wry>>,
 }
@@ -15,11 +14,7 @@ impl<'r> AutoStartManager<'r> {
         let manager = app.autolaunch();
         let settings = app.store("settings").unwrap();
 
-        Self {
-            app,
-            manager,
-            settings,
-        }
+        Self { manager, settings }
     }
 
     pub fn inherit_settings(&self) -> Result<(), Error> {
