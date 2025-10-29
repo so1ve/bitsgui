@@ -8,6 +8,7 @@ use tauri::{App, Manager, State, WindowEvent};
 use tauri_plugin_autostart::ManagerExt;
 #[cfg(not(dev))]
 use tauri_plugin_prevent_default::{Flags, KeyboardShortcut};
+use tauri_plugin_store::StoreExt;
 
 use crate::api::ApiResponse;
 
@@ -235,7 +236,26 @@ pub fn run() {
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|_app, event| {
+        .run(|app, event| {
+            let autostart_manager = app.autolaunch();
+            let settings = app.store("settings").unwrap();
+            if settings
+                .get("auto_start")
+                .unwrap_or_else(|| {
+                    settings.set("auto_start", false);
+                    settings.save().expect("failed to save settings");
+                    settings.get("auto_start").unwrap()
+                })
+                .as_bool()
+                .unwrap()
+            {
+                if !autostart_manager.is_enabled().unwrap_or(false) {
+                    autostart_manager.enable().unwrap();
+                }
+            } else if autostart_manager.is_enabled().unwrap_or(false) {
+                autostart_manager.disable().unwrap();
+            }
+
             if let tauri::RunEvent::ExitRequested { api, code, .. } = event
                 && code.is_none()
             {
