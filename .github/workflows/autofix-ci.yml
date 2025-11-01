@@ -25,17 +25,17 @@ jobs:
         with:
           workspaces: src-tauri
 
-      - name: Setup PNPM
-        run: corepack enable
-
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
           cache: pnpm
 
+      - name: Setup PNPM
+        run: corepack enable
+
       - name: Setup
-        run: npm i -g @antfu/ni
+        run: pnpm i -g @antfu/ni
 
       - name: Install
         run: ni --no-frozen-lockfile

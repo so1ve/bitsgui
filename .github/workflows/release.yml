@@ -72,6 +72,9 @@ jobs:
         with:
           node-version: 24.x
 
+      - name: Setup PNPM
+        run: corepack enable
+
       - name: Install
         run: pnpm install --no-frozen-lockfile
 

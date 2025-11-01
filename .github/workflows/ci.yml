@@ -50,3 +50,29 @@ jobs:
 
       - name: Run cargo fmt
         run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+  node:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: pnpm
+
+      - name: Setup PNPM
+        run: corepack enable
+
+      - name: Setup
+        run: pnpm i -g @antfu/ni
+
+      - name: Install
+        run: nci
+
+      - name: TypeCheck
+        run: nr typecheck
+
+      - name: Lint
+        run: nr lint
