@@ -35,15 +35,11 @@ watch(
 	},
 );
 
-if (state.firstOpen) {
+if (state.credentials.autoLogin && (state.firstOpen || !state.manualLogout)) {
 	state.firstOpen = false;
 
-	if (state.credentials.autoLogin && !state.manualLogout) {
-		await login(state.credentials);
-		await triggerCheckStatus();
-	} else {
-		loading.value = false;
-	}
+	await login(state.credentials);
+	await triggerCheckStatus();
 } else {
 	loading.value = false;
 }
