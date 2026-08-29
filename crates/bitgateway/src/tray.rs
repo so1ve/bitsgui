@@ -8,7 +8,7 @@ use dioxus::prelude::*;
 
 const MENU_SHOW_WINDOW: &str = "show_window";
 const MENU_EXIT_APP: &str = "exit_app";
-const APP_ICON: &[u8] = include_bytes!("../assets/icons/icon.png");
+const TRAY_ICON: &[u8] = include_bytes!("../assets/icons/tray.png");
 
 pub fn use_tray() {
     use_hook(|| {
@@ -16,9 +16,9 @@ pub fn use_tray() {
         let exit_item = MenuItem::with_id(MENU_EXIT_APP, "退出程序", true, None);
         let separator = PredefinedMenuItem::separator();
         let tray_menu = Menu::with_items(&[&show_item, &separator, &exit_item]).unwrap();
-        let tray_icon = icon_from_memory::<DioxusTrayIcon>(APP_ICON).ok();
+        let tray_icon = icon_from_memory::<DioxusTrayIcon>(TRAY_ICON).unwrap();
 
-        init_tray_icon(tray_menu, tray_icon);
+        init_tray_icon(tray_menu, Some(tray_icon));
     });
 
     use_muda_event_handler(move |event| match event.id().as_ref() {
