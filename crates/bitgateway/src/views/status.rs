@@ -64,11 +64,11 @@ fn InfoRow(label: &'static str, value: String) -> Element {
             class: "grid grid-cols-[78px_minmax(0,1fr)] items-baseline gap-3 border-b border-[#ddd] py-2.5",
             dt {
                 class: "text-xs font-medium text-[#666]",
-                "{label}"
+                {label}
             }
             dd {
                 class: "m-0 min-w-0 text-sm font-normal text-[#222] [overflow-wrap:anywhere]",
-                "{value}"
+                {value}
             }
         }
     }

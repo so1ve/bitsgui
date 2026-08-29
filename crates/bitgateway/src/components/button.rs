@@ -27,7 +27,7 @@ pub fn AppButton(
             class,
             disabled,
             onclick,
-            "{label}"
+            {label}
         }
     }
 }

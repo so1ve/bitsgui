@@ -71,7 +71,7 @@ pub fn SettingsPanel(
                 }
 
                 label {
-                    class: "{silent_class}",
+                    class: silent_class,
                     input {
                         r#type: "checkbox",
                         class: "accent-[#555]",
