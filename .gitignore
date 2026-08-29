@@ -3,3 +3,5 @@
 /dist-*
 /crates/bitgateway/dist
 /crates/bitgateway/dist-*
+/result
+.devenv

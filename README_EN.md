@@ -2,6 +2,9 @@
 
 [简体中文](./README.md) | English
 
+[![CI](https://github.com/so1ve/bitgateway/actions/workflows/ci.yml/badge.svg)](https://github.com/so1ve/bitgateway/actions/workflows/ci.yml)
+[![Cachix Cache](https://img.shields.io/badge/cachix-so1ve-blue.svg)](https://so1ve.cachix.org)
+
 A simple desktop app for logging in to and out of the BIT campus network gateway (10.0.0.55). Built with Dioxus.
 
 ## Download
@@ -86,7 +89,64 @@ dx bundle --release --platform linux \
 
 For platform-specific details, see the [official Dioxus documentation](https://dioxuslabs.com/).
 
-### Recommended IDE setup
+### Install with Nix
+
+Run directly:
+
+```sh
+nix run github:so1ve/bitgateway
+```
+
+Add BITGATEWAY to your flake inputs:
+
+```nix
+inputs.bitgateway.url = "github:so1ve/bitgateway";
+```
+
+NixOS can import the module directly:
+
+```nix
+{ inputs, ... }:
+
+{
+  imports = [ inputs.bitgateway.nixosModules.default ];
+
+  services.bitgateway = {
+    enable = true;
+    autoStart = true;
+    silentStart = true;
+  };
+}
+```
+
+Home Manager:
+
+```nix
+{ inputs, ... }:
+
+{
+  imports = [ inputs.bitgateway.homeManagerModules.default ];
+
+  services.bitgateway = {
+    enable = true;
+    autoStart = true;
+    silentStart = true;
+  };
+}
+```
+
+Cachix:
+
+```nix
+nix.settings = {
+  extra-substituters = [ "https://so1ve.cachix.org" ];
+  extra-trusted-public-keys = [
+    "so1ve.cachix.org-1:51jcW4FkJhiLcqPsiUx3nglRP469les8F9zjFxio1nw="
+  ];
+};
+```
+
+## Recommended IDE setup
 
 - [VS Code](https://code.visualstudio.com/) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 

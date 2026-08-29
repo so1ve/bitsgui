@@ -2,6 +2,9 @@
 
 简体中文 | [English](./README_EN.md)
 
+[![CI](https://github.com/so1ve/bitgateway/actions/workflows/ci.yml/badge.svg)](https://github.com/so1ve/bitgateway/actions/workflows/ci.yml)
+[![Cachix Cache](https://img.shields.io/badge/cachix-so1ve-blue.svg)](https://so1ve.cachix.org)
+
 一个简单的 BIT 校园网（10.0.0.55）登录/登出桌面应用。使用 Dioxus 构建。
 
 ## 下载
@@ -86,7 +89,64 @@ dx bundle --release --platform linux \
 
 更多平台相关说明请参考 [Dioxus 官方文档](https://dioxuslabs.com/)。
 
-### 推荐的 IDE 设置
+### 使用 Nix
+
+直接运行：
+
+```sh
+nix run github:so1ve/bitgateway
+```
+
+在 flake inputs 中加入 BITGATEWAY：
+
+```nix
+inputs.bitgateway.url = "github:so1ve/bitgateway";
+```
+
+NixOS 可以直接导入模块：
+
+```nix
+{ inputs, ... }:
+
+{
+  imports = [ inputs.bitgateway.nixosModules.default ];
+
+  services.bitgateway = {
+    enable = true;
+    autoStart = true;
+    silentStart = true;
+  };
+}
+```
+
+Home Manager：
+
+```nix
+{ inputs, ... }:
+
+{
+  imports = [ inputs.bitgateway.homeManagerModules.default ];
+
+  services.bitgateway = {
+    enable = true;
+    autoStart = true;
+    silentStart = true;
+  };
+}
+```
+
+Cachix：
+
+```nix
+nix.settings = {
+  extra-substituters = [ "https://so1ve.cachix.org" ];
+  extra-trusted-public-keys = [
+    "so1ve.cachix.org-1:51jcW4FkJhiLcqPsiUx3nglRP469les8F9zjFxio1nw="
+  ];
+};
+```
+
+## 推荐的 IDE 设置
 
 - [VS Code](https://code.visualstudio.com/) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
