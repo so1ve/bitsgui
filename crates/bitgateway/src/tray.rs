@@ -1,9 +1,11 @@
+#[cfg(target_os = "macos")]
+mod macos;
+#[cfg(target_os = "windows")]
+mod windows;
+
 use dioxus::desktop::trayicon::menu::{Menu, MenuItem, PredefinedMenuItem};
-use dioxus::desktop::trayicon::{DioxusTrayIcon, TrayIconEvent, init_tray_icon};
-use dioxus::desktop::{
-    WindowCloseBehaviour, icon_from_memory, use_muda_event_handler, use_tray_icon_event_handler,
-    window,
-};
+use dioxus::desktop::trayicon::{DioxusTrayIcon, init_tray_icon};
+use dioxus::desktop::{WindowCloseBehaviour, icon_from_memory, use_muda_event_handler, window};
 use dioxus::prelude::*;
 
 const MENU_SHOW_WINDOW: &str = "show_window";
@@ -27,11 +29,11 @@ pub fn use_tray() {
         _ => {}
     });
 
-    use_tray_icon_event_handler(move |event| {
-        if let TrayIconEvent::DoubleClick { .. } = event {
-            show_window();
-        }
-    });
+    #[cfg(target_os = "macos")]
+    macos::use_tray_activation();
+
+    #[cfg(target_os = "windows")]
+    windows::use_tray_activation();
 }
 
 fn show_window() {
